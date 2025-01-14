@@ -45,11 +45,15 @@ class MusicBot(commands.Bot):
             json.dump(self.playlists, f, indent=2)
 
     async def setup_hook(self):
-        node = wavelink.Node(
-            uri=f"http://{LAVALINK_CONFIG['host']}:{LAVALINK_CONFIG['port']}", 
-            password=LAVALINK_CONFIG['password']
+        await wavelink.Pool.connect(
+            client=self,
+            nodes=[
+                wavelink.Node(
+                    uri=f"http://{LAVALINK_CONFIG['host']}:{LAVALINK_CONFIG['port']}", 
+                    password=LAVALINK_CONFIG['password']
+                )
+            ]
         )
-        await wavelink.NodePool.connect(client=self, nodes=[node])
         await self.tree.sync()
 
 class Music(commands.Cog):
@@ -131,56 +135,68 @@ class Music(commands.Cog):
             if not interaction.user.voice:
                 await interaction.response.send_message("You need to be in a voice channel!", ephemeral=True)
                 return
-            await interaction.user.voice.channel.connect(cls=wavelink.Player)
+            try:
+                await interaction.user.voice.channel.connect(cls=wavelink.Player)
+            except Exception as e:
+                print(f"Error connecting to voice channel: {e}")
+                await interaction.response.send_message("Failed to connect to voice channel!", ephemeral=True)
+                return
 
         await interaction.response.defer()
 
-        if 'spotify.com/track' in query:
-            track = await self.process_spotify_track(query)
-            if not track:
-                await interaction.followup.send("Could not process Spotify track!")
-                return
-        elif 'spotify.com/playlist' in query:
-            await interaction.followup.send("Processing Spotify playlist... This might take a while.")
-            tracks = await self.process_spotify_playlist(query)
-            if not tracks:
-                await interaction.followup.send("Could not process Spotify playlist!")
-                return
-            
-            queue = self.get_queue(interaction.guild_id)
-            queue.extend(tracks)
-            
-            if not interaction.guild.voice_client.is_playing():
-                track = queue.pop(0)
-                await interaction.guild.voice_client.play(track)
-                self.now_playing[interaction.guild_id] = track
-            
-            await interaction.followup.send(f"Added {len(tracks)} tracks from Spotify playlist to the queue!")
-            return
-        else:
-            tracks = await wavelink.YouTubeTrack.search(query)
-            if not tracks:
-                await interaction.followup.send("No tracks found!")
-                return
-            track = tracks[0]
+        try:
+            player: wavelink.Player = interaction.guild.voice_client
 
-        queue = self.get_queue(interaction.guild_id)
-        
-        if interaction.guild.voice_client.is_playing():
-            queue.append(track)
-            await interaction.followup.send(f"Added to queue: {track.title}")
-        else:
-            await interaction.guild.voice_client.play(track)
-            self.now_playing[interaction.guild_id] = track
-            await interaction.followup.send(f"Now playing: {track.title}")
+            if 'spotify.com/track' in query:
+                track = await self.process_spotify_track(query)
+                if not track:
+                    await interaction.followup.send("Could not process Spotify track!")
+                    return
+            elif 'spotify.com/playlist' in query:
+                await interaction.followup.send("Processing Spotify playlist... This might take a while.")
+                tracks = await self.process_spotify_playlist(query)
+                if not tracks:
+                    await interaction.followup.send("Could not process Spotify playlist!")
+                    return
+                
+                queue = self.get_queue(interaction.guild_id)
+                queue.extend(tracks)
+                
+                if not player.playing:
+                    track = queue.pop(0)
+                    await player.play(track)
+                    self.now_playing[interaction.guild_id] = track
+                
+                await interaction.followup.send(f"Added {len(tracks)} tracks from Spotify playlist to the queue!")
+                return
+            else:
+                tracks = await wavelink.Playable.search(query)
+                if not tracks:
+                    await interaction.followup.send("No tracks found!")
+                    return
+                track = tracks[0]
+
+            queue = self.get_queue(interaction.guild_id)
+            
+            if player.playing:
+                queue.append(track)
+                await interaction.followup.send(f"Added to queue: {track.title}")
+            else:
+                await player.play(track)
+                self.now_playing[interaction.guild_id] = track
+                await interaction.followup.send(f"Now playing: {track.title}")
+        except Exception as e:
+            print(f"Error in play command: {e}")
+            await interaction.followup.send("An error occurred while trying to play the track!", ephemeral=True)
 
     @app_commands.command(name="skip", description="Skip the current song")
     async def skip(self, interaction: discord.Interaction):
-        if not interaction.guild.voice_client or not interaction.guild.voice_client.is_playing():
+        if not interaction.guild.voice_client or not getattr(interaction.guild.voice_client, "playing", False):
             await interaction.response.send_message("Nothing is playing!", ephemeral=True)
             return
 
-        await interaction.guild.voice_client.stop()
+        player: wavelink.Player = interaction.guild.voice_client
+        await player.stop()
         await interaction.response.send_message("Skipped current track!")
 
     @app_commands.command(name="queue", description="Show the current queue")
