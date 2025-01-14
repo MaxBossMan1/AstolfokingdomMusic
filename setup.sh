@@ -2,9 +2,9 @@
 
 echo "Setting up Discord Music Bot..."
 
-# Check if Python is installed
-if ! command -v python3 &> /dev/null; then
-    echo "Python is not installed! Please install Python 3.12 or newer"
+# Check if Python 3.11 is installed
+if ! command -v python3.11 &> /dev/null; then
+    echo "Python 3.11 is not installed! Please install Python 3.11"
     exit 1
 fi
 
@@ -17,16 +17,24 @@ fi
 # Create directories
 mkdir -p lavalink logs
 
+# Create virtual environment if it doesn't exist
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3.11 -m venv venv
+fi
+
 # Download Lavalink if not exists
 if [ ! -f "lavalink/Lavalink.jar" ]; then
     echo "Downloading Lavalink..."
     curl -L "https://github.com/lavalink-devs/Lavalink/releases/download/3.7.11/Lavalink.jar" -o "lavalink/Lavalink.jar"
 fi
 
-# Install Python dependencies
+# Activate virtual environment and install dependencies
 echo "Installing Python dependencies..."
-python3 -m pip install --upgrade pip
-python3 -m pip install -r requirements.txt
+source venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+deactivate
 
 # Create config.json if it doesn't exist
 if [ ! -f "config.json" ]; then

@@ -22,10 +22,10 @@ A feature-rich Discord music bot with playlist support, Spotify integration, and
 
 ### Prerequisites
 
-1. Install Python 3.8+ (Python 3.12 recommended):
-   - Windows: [Python.org](https://www.python.org/downloads/)
-   - Linux: `sudo apt install python3.12` (Ubuntu/Debian)
-   - macOS: `brew install python@3.12` (with Homebrew)
+1. Install Python 3.11 (required for compatibility):
+   - Windows: [Python.org](https://www.python.org/downloads/release/python-3118/)
+   - Linux: `sudo apt install python3.11` (Ubuntu/Debian)
+   - macOS: `brew install python@3.11` (with Homebrew)
 
 2. Install Java 17 or newer:
    - Windows: [Adoptium](https://adoptium.net/)

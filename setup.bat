@@ -3,10 +3,10 @@ setlocal enabledelayedexpansion
 
 echo Setting up Discord Music Bot...
 
-:: Check if Python is installed
-python --version > nul 2>&1
+:: Check if Python 3.11 is installed
+py -3.11 --version > nul 2>&1
 if errorlevel 1 (
-    echo Python is not installed! Please install Python 3.12 from https://www.python.org/downloads/
+    echo Python 3.11 is not installed! Please install Python 3.11 from https://www.python.org/downloads/
     pause
     exit /b 1
 )
@@ -22,6 +22,10 @@ if errorlevel 1 (
 :: Create directories
 if not exist "lavalink" mkdir lavalink
 if not exist "logs" mkdir logs
+if not exist "venv" (
+    echo Creating virtual environment...
+    py -3.11 -m venv venv
+)
 
 :: Download Lavalink if not exists
 if not exist "lavalink\Lavalink.jar" (
@@ -29,10 +33,12 @@ if not exist "lavalink\Lavalink.jar" (
     powershell -Command "Invoke-WebRequest -Uri 'https://github.com/lavalink-devs/Lavalink/releases/download/3.7.11/Lavalink.jar' -OutFile 'lavalink\Lavalink.jar'"
 )
 
-:: Install Python dependencies
+:: Activate virtual environment and install dependencies
 echo Installing Python dependencies...
+call venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+deactivate
 
 :: Create config.json if it doesn't exist
 if not exist "config.json" (
