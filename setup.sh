@@ -23,19 +23,16 @@ if [ ! -d "venv" ]; then
     python3.11 -m venv venv
 fi
 
-# Create plugins directory
-mkdir -p lavalink/plugins
+# Create Lavalink directory
+mkdir -p lavalink
 
 # Download Lavalink if not exists
 if [ ! -f "lavalink/Lavalink.jar" ]; then
     echo "Downloading Lavalink..."
-    curl -L "https://github.com/lavalink-devs/Lavalink/releases/download/3.7.11/Lavalink.jar" -o "lavalink/Lavalink.jar"
-fi
-
-# Download YouTube plugin if not exists
-if [ ! -f "lavalink/plugins/lavalink-youtube-plugin.jar" ]; then
-    echo "Downloading YouTube plugin..."
-    curl -L "https://github.com/lavalink-devs/youtube-source/releases/download/1.0.0/lavalink-youtube-plugin-1.0.0.jar" -o "lavalink/plugins/lavalink-youtube-plugin.jar"
+    if ! curl -L "https://github.com/lavalink-devs/Lavalink/releases/download/3.7.11/Lavalink.jar" -o "lavalink/Lavalink.jar"; then
+        echo "Failed to download Lavalink.jar"
+        exit 1
+    fi
 fi
 
 # Activate virtual environment and install dependencies
