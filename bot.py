@@ -64,7 +64,8 @@ class Music(commands.Cog):
         return self.queue[guild_id]
 
     @commands.Cog.listener()
-    async def on_wavelink_track_end(self, player: wavelink.Player, track: wavelink.Track, reason):
+    async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
+        player = payload.player
         if not player.guild:
             return
 
@@ -81,12 +82,12 @@ class Music(commands.Cog):
         else:
             await player.disconnect()
 
-    async def process_spotify_track(self, track_url: str) -> Optional[wavelink.Track]:
+    async def process_spotify_track(self, track_url: str) -> Optional[wavelink.Playable]:
         try:
             track_id = track_url.split('/')[-1].split('?')[0]
             track_info = self.bot.spotify.track(track_id)
             search_query = f"{track_info['name']} {' '.join(artist['name'] for artist in track_info['artists'])}"
-            tracks = await wavelink.YouTubeTrack.search(search_query)
+            tracks = await wavelink.Playable.search(search_query)
             return tracks[0] if tracks else None
         except Exception as e:
             print(f"Error processing Spotify track: {e}")
@@ -101,7 +102,7 @@ class Music(commands.Cog):
             for item in results['items']:
                 track = item['track']
                 search_query = f"{track['name']} {' '.join(artist['name'] for artist in track['artists'])}"
-                found_tracks = await wavelink.YouTubeTrack.search(search_query)
+                found_tracks = await wavelink.Playable.search(search_query)
                 if found_tracks:
                     tracks.append(found_tracks[0])
             
