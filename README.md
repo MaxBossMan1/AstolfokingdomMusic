@@ -20,33 +20,60 @@ A feature-rich Discord music bot with playlist support, Spotify integration, and
 
 ## Setup
 
-1. Make sure you have Python 3.8+ installed (Python 3.12 recommended)
+### Prerequisites
 
-2. Install Visual Studio Build Tools (Windows only):
+1. Install Python 3.8+ (Python 3.12 recommended):
+   - Windows: [Python.org](https://www.python.org/downloads/)
+   - Linux: `sudo apt install python3.12` (Ubuntu/Debian)
+   - macOS: `brew install python@3.12` (with Homebrew)
+
+2. Install Java 17 or newer:
+   - Windows: [Adoptium](https://adoptium.net/)
+   - Linux: `sudo apt install openjdk-17-jre` (Ubuntu/Debian)
+   - macOS: `brew install openjdk@17` (with Homebrew)
+
+3. Install Visual Studio Build Tools (Windows only):
    - Download and install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
    - During installation, select "Desktop development with C++"
 
-3. Install dependencies:
-   ```bash
-   # Windows
-   py -3.12 -m pip install --upgrade pip
-   py -3.12 -m pip install -r requirements.txt
+### Automatic Setup
 
-   # Linux/macOS
-   python3 -m pip install --upgrade pip
-   python3 -m pip install -r requirements.txt
+#### Windows
+1. Run `setup.bat`
+2. Edit `config.json` with your Discord and Spotify tokens
+3. Run `start.bat` to start both Lavalink and the bot
+
+#### Linux/macOS
+1. Run `chmod +x setup.sh start.sh`
+2. Run `./setup.sh`
+3. Edit `config.json` with your Discord and Spotify tokens
+4. Run `./start.sh` to start both Lavalink and the bot
+
+### Manual Setup
+
+If you prefer to set up everything manually:
+
+1. Install Python dependencies:
+   ```bash
+   python -m pip install -r requirements.txt
    ```
 
-4. Set up configuration:
+2. Set up configuration:
    - Copy `config.json.example` to `config.json`
-   - Fill in your Discord bot token and Spotify credentials in `config.json`
+   - Fill in your Discord and Spotify credentials
 
 3. Set up Lavalink:
-   - Download the latest Lavalink.jar
-   - Create an application.yml file for Lavalink configuration
-   - Run Lavalink server: `java -jar Lavalink.jar`
+   - Download [Lavalink.jar](https://github.com/lavalink-devs/Lavalink/releases)
+   - Place it in the `lavalink` directory
+   - The `application.yml` file is already configured
 
-4. Run the bot:
+4. Start Lavalink:
+   ```bash
+   cd lavalink
+   java -jar Lavalink.jar
+   ```
+
+5. In a new terminal, start the bot:
    ```bash
    python bot.py
    ```
