@@ -1,6 +1,7 @@
-discord.py[voice]
-yt-dlp
-spotipy
-python-dotenv
+discord.py[voice]==2.3.2
+yt-dlp==2023.11.16
+spotipy==2.23.0
 wavelink==2.6.4
-aiohttp
+aiohttp==3.9.1
+attrs>=23.1.0
+yarl==1.9.3

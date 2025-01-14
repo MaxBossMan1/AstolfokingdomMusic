@@ -1,21 +1,22 @@
-import os
 import discord
 from discord import app_commands
 from discord.ext import commands
 import wavelink
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from dotenv import load_dotenv
 import asyncio
 import json
 from typing import Optional, List
 import datetime
 
-load_dotenv()
+# Load configuration
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
-SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
+DISCORD_TOKEN = config['DISCORD_TOKEN']
+SPOTIFY_CLIENT_ID = config['SPOTIFY_CLIENT_ID']
+SPOTIFY_CLIENT_SECRET = config['SPOTIFY_CLIENT_SECRET']
+LAVALINK_CONFIG = config['LAVALINK']
 
 class MusicBot(commands.Bot):
     def __init__(self):
@@ -44,7 +45,10 @@ class MusicBot(commands.Bot):
             json.dump(self.playlists, f, indent=2)
 
     async def setup_hook(self):
-        node = wavelink.Node(uri='http://localhost:2333', password='youshallnotpass')
+        node = wavelink.Node(
+            uri=f"http://{LAVALINK_CONFIG['host']}:{LAVALINK_CONFIG['port']}", 
+            password=LAVALINK_CONFIG['password']
+        )
         await wavelink.NodePool.connect(client=self, nodes=[node])
         await self.tree.sync()
 

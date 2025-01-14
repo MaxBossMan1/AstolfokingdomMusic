@@ -20,14 +20,26 @@ A feature-rich Discord music bot with playlist support, Spotify integration, and
 
 ## Setup
 
-1. Install dependencies:
+1. Make sure you have Python 3.8+ installed (Python 3.12 recommended)
+
+2. Install Visual Studio Build Tools (Windows only):
+   - Download and install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+   - During installation, select "Desktop development with C++"
+
+3. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   # Windows
+   py -3.12 -m pip install --upgrade pip
+   py -3.12 -m pip install -r requirements.txt
+
+   # Linux/macOS
+   python3 -m pip install --upgrade pip
+   python3 -m pip install -r requirements.txt
    ```
 
-2. Set up environment variables:
-   - Copy `.env.example` to `.env`
-   - Fill in your Discord bot token and Spotify credentials
+4. Set up configuration:
+   - Copy `config.json.example` to `config.json`
+   - Fill in your Discord bot token and Spotify credentials in `config.json`
 
 3. Set up Lavalink:
    - Download the latest Lavalink.jar
