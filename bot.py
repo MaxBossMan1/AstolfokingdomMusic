@@ -45,16 +45,33 @@ class MusicBot(commands.Bot):
             json.dump(self.playlists, f, indent=2)
 
     async def setup_hook(self):
-        await wavelink.Pool.connect(
-            client=self,
-            nodes=[
-                wavelink.Node(
-                    uri=f"http://{LAVALINK_CONFIG['host']}:{LAVALINK_CONFIG['port']}", 
-                    password=LAVALINK_CONFIG['password']
-                )
-            ]
-        )
+        # Create and connect to our Lavalink nodes
+        nodes = [
+            wavelink.Node(
+                uri=f"http://{LAVALINK_CONFIG['host']}:{LAVALINK_CONFIG['port']}", 
+                password=LAVALINK_CONFIG['password']
+            )
+        ]
+        
+        # Attempt to connect to the Lavalink node with retries
+        retries = 5
+        while retries > 0:
+            try:
+                await wavelink.Pool.connect(client=self, nodes=nodes)
+                print("Successfully connected to Lavalink node!")
+                break
+            except Exception as e:
+                retries -= 1
+                if retries == 0:
+                    print(f"Failed to connect to Lavalink after all retries: {e}")
+                    raise
+                print(f"Failed to connect to Lavalink, retrying... ({retries} attempts left)")
+                await asyncio.sleep(5)  # Wait 5 seconds before retrying
+
         await self.tree.sync()
+
+    async def on_wavelink_node_ready(self, node: wavelink.Node):
+        print(f'Node {node.identifier} is ready!')
 
 class Music(commands.Cog):
     def __init__(self, bot: MusicBot):
@@ -131,15 +148,26 @@ class Music(commands.Cog):
     @app_commands.command(name="play", description="Play a song or add it to queue")
     @app_commands.describe(query="Song URL or search query")
     async def play(self, interaction: discord.Interaction, query: str):
+        # Check if we have any available nodes
+        if not wavelink.Pool.nodes:
+            await interaction.response.send_message("Music system is not ready yet. Please try again in a few moments.", ephemeral=True)
+            return
+
+        # Check if user is in a voice channel
+        if not interaction.user.voice:
+            await interaction.response.send_message("You need to be in a voice channel!", ephemeral=True)
+            return
+
+        # Connect to voice channel if not already connected
         if not interaction.guild.voice_client:
-            if not interaction.user.voice:
-                await interaction.response.send_message("You need to be in a voice channel!", ephemeral=True)
-                return
             try:
                 await interaction.user.voice.channel.connect(cls=wavelink.Player)
             except Exception as e:
                 print(f"Error connecting to voice channel: {e}")
-                await interaction.response.send_message("Failed to connect to voice channel!", ephemeral=True)
+                await interaction.response.send_message(
+                    "Failed to connect to voice channel! Make sure the bot has the correct permissions.",
+                    ephemeral=True
+                )
                 return
 
         await interaction.response.defer()

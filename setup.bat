@@ -27,10 +27,19 @@ if not exist "venv" (
     py -3.11 -m venv venv
 )
 
+:: Create plugins directory
+if not exist "lavalink\plugins" mkdir lavalink\plugins
+
 :: Download Lavalink if not exists
 if not exist "lavalink\Lavalink.jar" (
     echo Downloading Lavalink...
     powershell -Command "Invoke-WebRequest -Uri 'https://github.com/lavalink-devs/Lavalink/releases/download/3.7.11/Lavalink.jar' -OutFile 'lavalink\Lavalink.jar'"
+)
+
+:: Download YouTube plugin if not exists
+if not exist "lavalink\plugins\lavalink-youtube-plugin.jar" (
+    echo Downloading YouTube plugin...
+    powershell -Command "Invoke-WebRequest -Uri 'https://github.com/lavalink-devs/youtube-source/releases/download/1.0.0/lavalink-youtube-plugin-1.0.0.jar' -OutFile 'lavalink\plugins\lavalink-youtube-plugin.jar'"
 )
 
 :: Activate virtual environment and install dependencies

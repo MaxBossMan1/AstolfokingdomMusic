@@ -2,6 +2,8 @@ server:
   port: 2333
   address: 127.0.0.1
 lavalink:
+  plugins:
+    - dependency: "com.github.lavalink-devs:lavalink-youtube-plugin:1.0.0"
   server:
     password: "youshallnotpass"
     sources:
@@ -19,6 +21,8 @@ lavalink:
     youtubeSearchEnabled: true
     soundcloudSearchEnabled: true
     gc-warnings: true
+    plugins:
+      - "lavalink-youtube-plugin.jar"
 
 metrics:
   prometheus:
